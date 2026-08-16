@@ -51,6 +51,7 @@ export interface CarpoolTrip {
   routeHighway: string;
   availableSeats: number;
   totalSeats: number;
+  price?: number;
   preferences: string[];
   carModel?: string;
   carPlate?: string;

@@ -71,6 +71,7 @@ export interface CarpoolTrip {
   recurringDays?: string[]; // ['周一', '周二', '周三', '周四', '周五']
   totalSeats: number;
   availableSeats: number;
+  price?: number; // 拼车分摊费用（元/位）
   carInfo?: CarInfo;
   preferences: string[]; // ['准时发车', '禁烟', '走正阳快速路', '后排宽松', '轻声交流', '可放行李']
   routeHighway: string; // 如：正阳大道 ➔ 绕城高速 ➔ 唐延路
@@ -80,6 +81,7 @@ export interface CarpoolTrip {
   status: TripStatus;
   createdAt: string;
   bookings: PassengerBooking[];
+  viewCount?: number;
 }
 
 export interface FilterOptions {

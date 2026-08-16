@@ -1,0 +1,9 @@
+{
+  "name": "getStats",
+  "version": "1.0.0",
+  "description": "微信云函数 - 获取拼车大厅实时统计",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -48,6 +48,7 @@
   "appid": "wx8f9a21d4c78b",
   "projectname": "hengda-carpool-miniprogram",
   "miniprogramRoot": "miniprogram/",
+  "cloudfunctionRoot": "cloudfunctions/",
   "condition": {},
   "editorSetting": {
     "tabIndent": "insertSpaces",

@@ -10,18 +10,15 @@ import {
   Bell, 
   QrCode, 
   ChevronRight, 
-  HeartHandshake, 
   Sparkles, 
-  Award, 
-  Smartphone, 
   Share2, 
   CheckCircle2,
-  ExternalLink,
+  Phone,
   MessageCircle,
-  HelpCircle,
   RotateCcw
 } from 'lucide-react';
 import { UserProfile, CarpoolTrip } from '@/types/carpool';
+import { WeChatTabType } from '@/components/wechat/WeChatTabBar';
 
 interface WeChatProfileViewProps {
   currentUser: UserProfile;
@@ -30,7 +27,7 @@ interface WeChatProfileViewProps {
   onOpenCharter: () => void;
   onOpenAi: () => void;
   onOpenShare: () => void;
-  onSelectTab: (tab: 'hall' | 'map' | 'my_trips' | 'profile') => void;
+  onSelectTab: (tab: WeChatTabType) => void;
   onResetData: () => void;
 }
 
@@ -67,84 +64,60 @@ export default function WeChatProfileView({
         </div>
       )}
 
-      {/* WeChat Header Card */}
+      {/* Simplified WeChat Header Card (Clean, elegant, no redundant buttons or micro-signals) */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 p-5 text-white shadow-md">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="h-14 w-14 rounded-2xl border-2 border-white/80 object-cover shadow-sm"
-              />
-              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-white">
-                <ShieldCheck className="h-3 w-3" />
-              </div>
+        <div className="flex items-center gap-3.5">
+          <img
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            className="h-14 w-14 rounded-2xl border-2 border-white/80 object-cover shadow-sm"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-black tracking-tight truncate">{currentUser.name}</h3>
+              <span className="shrink-0 rounded-full bg-emerald-400/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200 backdrop-blur-xs">
+                文旅城邻居
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-base font-black tracking-tight">{currentUser.name}</h3>
-                <span className="rounded-full bg-emerald-400/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200 backdrop-blur-xs">
-                  已认证业主
-                </span>
-              </div>
-              <p className="text-xs text-emerald-100/90 mt-0.5">
-                {currentUser.communityPhase}
-              </p>
-              <div className="flex items-center gap-2 text-[11px] text-emerald-200/80 mt-1">
-                <span>微信号：hd_owner_{currentUser.id.slice(-4)}</span>
-                <span>•</span>
-                <span>{currentUser.phone}</span>
-              </div>
-            </div>
+            <p className="text-xs text-emerald-100/90 mt-1 truncate">
+              {currentUser.communityPhase || '恒大文旅城·邻里通勤'}
+            </p>
           </div>
-
-          <button
-            onClick={onOpenVerify}
-            className="rounded-xl border border-white/30 bg-white/10 px-2.5 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md hover:bg-white/20 active:scale-95 transition"
-          >
-            编辑资料
-          </button>
         </div>
 
-        {/* Resident Verification Badge Bar */}
-        <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/25 px-3.5 py-2.5 backdrop-blur-md text-xs">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-emerald-300" />
-            <div>
-              <span className="font-bold text-white">房号与身份核实</span>
-              <span className="text-emerald-300 ml-1.5">{currentUser.roomNumber}</span>
-            </div>
+        {/* Quick Location info */}
+        <div className="mt-3.5 flex items-center justify-between rounded-2xl bg-black/25 px-3.5 py-2.5 backdrop-blur-md text-xs">
+          <div className="flex items-center gap-2 truncate">
+            <MapPin className="h-4 w-4 text-emerald-300 shrink-0" />
+            <span className="text-white truncate">
+              常用门岗：<span className="text-emerald-300 font-medium">{currentUser.roomNumber ? currentUser.roomNumber : '星空门岗 / 童梦汇'}</span>
+            </span>
           </div>
-          <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/30">
-            文旅城专属身份
+          <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-full border border-emerald-400/30 shrink-0">
+            开放互助
           </span>
         </div>
       </div>
 
-      {/* Credit & Impact Stats Bar */}
-      <div className="grid grid-cols-4 gap-2 rounded-2xl bg-white p-3 border border-slate-200/80 shadow-xs text-center">
+      {/* Credit & Activity Stats Bar */}
+      <div className="grid grid-cols-3 gap-2 rounded-2xl bg-white p-3 border border-slate-200/80 shadow-xs text-center">
         <div className="space-y-0.5">
           <div className="text-base font-black text-emerald-600">100%</div>
           <div className="text-[10px] text-slate-400">守时率</div>
         </div>
         <div className="space-y-0.5 border-l border-slate-100">
           <div className="text-base font-black text-slate-900">{currentUser.completedTripsCount}次</div>
-          <div className="text-[10px] text-slate-400">互助出行</div>
+          <div className="text-[10px] text-slate-400">顺路拼车</div>
         </div>
         <div className="space-y-0.5 border-l border-slate-100">
           <div className="text-base font-black text-blue-600">58.4kg</div>
-          <div className="text-[10px] text-slate-400">减碳排放</div>
-        </div>
-        <div className="space-y-0.5 border-l border-slate-100">
-          <div className="text-base font-black text-amber-600">0元</div>
-          <div className="text-[10px] text-slate-400">公益互助</div>
+          <div className="text-[10px] text-slate-400">绿色减排</div>
         </div>
       </div>
 
       {/* Quick Action Matrix (WeChat Services Grid) */}
       <div className="rounded-3xl bg-white p-4 border border-slate-200/80 shadow-xs space-y-3">
-        <div className="text-xs font-bold text-slate-800">我的通勤服务</div>
+        <div className="text-xs font-bold text-slate-800">快捷服务</div>
         <div className="grid grid-cols-4 gap-2">
           <button
             onClick={() => onSelectTab('my_trips')}
@@ -160,16 +133,13 @@ export default function WeChatProfileView({
           </button>
 
           <button
-            onClick={() => onSelectTab('my_trips')}
+            onClick={() => onSelectTab('publish')}
             className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-2xl hover:bg-slate-50 active:scale-95 transition"
           >
             <div className="h-10 w-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
               <FileText className="h-5 w-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-800">我的预约</span>
-            {myBookedCount > 0 && (
-              <span className="text-[9px] text-blue-600 font-bold -mt-1">({myBookedCount}个)</span>
-            )}
+            <span className="text-[11px] font-medium text-slate-800">发布信息</span>
           </button>
 
           <button
@@ -179,59 +149,59 @@ export default function WeChatProfileView({
             <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-2xs">
               <Share2 className="h-5 w-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-800">群拼车卡片</span>
+            <span className="text-[11px] font-medium text-slate-800">分享大厅</span>
           </button>
 
           <button
-            onClick={onOpenAi}
+            onClick={onOpenCharter}
             className="flex flex-col items-center justify-center gap-1.5 p-2 rounded-2xl hover:bg-slate-50 active:scale-95 transition"
           >
-            <div className="h-10 w-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-2xs">
-              <Sparkles className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shadow-2xs">
+              <ShieldCheck className="h-5 w-5" />
             </div>
-            <span className="text-[11px] font-medium text-slate-800">AI 小恒助手</span>
+            <span className="text-[11px] font-medium text-slate-800">邻里公约</span>
           </button>
         </div>
       </div>
 
       {/* WeChat Cell Group: Account & Community Settings */}
       <div className="rounded-3xl bg-white border border-slate-200/80 shadow-xs overflow-hidden divide-y divide-slate-100 text-xs">
-        {/* Verification Status */}
+        {/* User Profile & Car Settings */}
         <button
           onClick={onOpenVerify}
           className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 text-left transition"
         >
           <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <ShieldCheck className="h-4 w-4" />
+              <Car className="h-4 w-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">恒大文旅城业主认证</div>
-              <div className="text-[10px] text-slate-400">核验门岗、楼栋与车牌号</div>
+              <div className="font-bold text-slate-900">个人资料与车辆设置 (选填)</div>
+              <div className="text-[10px] text-slate-400">设置昵称、常用门岗及车牌信息</div>
             </div>
           </div>
           <div className="flex items-center gap-1 text-slate-400">
-            <span className="text-[11px] font-semibold text-emerald-600">已认证</span>
+            <span className="text-[11px] font-semibold text-emerald-600">设置</span>
             <ChevronRight className="h-4 w-4" />
           </div>
         </button>
 
-        {/* Safety & Non-profit Charter */}
+        {/* Safety Charter */}
         <button
           onClick={onOpenCharter}
           className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 text-left transition"
         >
           <div className="flex items-center gap-2.5">
             <div className="h-8 w-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-              <HeartHandshake className="h-4 w-4" />
+              <ShieldCheck className="h-4 w-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">0元公益互助公约与免责协议</div>
-              <div className="text-[10px] text-slate-400">非营运合乘准则与安全守则</div>
+              <div className="font-bold text-slate-900">邻里拼车互助公约与安全守则</div>
+              <div className="text-[10px] text-slate-400">文明合乘准则与准时守则</div>
             </div>
           </div>
           <div className="flex items-center gap-1 text-slate-400">
-            <span className="text-[11px] text-slate-400">已签署</span>
+            <span className="text-[11px] text-slate-400">查看</span>
             <ChevronRight className="h-4 w-4" />
           </div>
         </button>
@@ -243,8 +213,8 @@ export default function WeChatProfileView({
               <Bell className="h-4 w-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">微信服务通知 (出行与预约提醒)</div>
-              <div className="text-[10px] text-slate-400">发车前15分钟微信弹窗、邻居预约提醒</div>
+              <div className="font-bold text-slate-900">微信服务通知 (发车与预约提醒)</div>
+              <div className="text-[10px] text-slate-400">发车前15分钟微信提醒、邻居预约提醒</div>
             </div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -272,7 +242,7 @@ export default function WeChatProfileView({
               <MessageCircle className="h-4 w-4" />
             </div>
             <div>
-              <div className="font-bold text-slate-900">恒大文旅城业主微信拼车群</div>
+              <div className="font-bold text-slate-900">恒大文旅城邻里微信拼车群</div>
               <div className="text-[10px] text-slate-400">加入500人文旅城早晚高峰互助群</div>
             </div>
           </div>
@@ -306,10 +276,7 @@ export default function WeChatProfileView({
       {/* Bottom WeChat Applet Info */}
       <div className="text-center space-y-1 pt-2">
         <p className="text-[11px] text-slate-400 font-medium">
-          恒大文化旅游城业主自发共建 · 0元公益非营运互助
-        </p>
-        <p className="text-[10px] text-slate-300">
-          微信小程序 AppID: wx8f9a21d4c78b · v1.2.0 (Build 2026.08)
+          恒大文化旅游城 · 邻里通勤顺路拼车信息平台
         </p>
       </div>
 
@@ -322,16 +289,15 @@ export default function WeChatProfileView({
             </div>
 
             <div>
-              <h3 className="text-base font-black text-slate-900">恒大文旅城业主通勤拼车群</h3>
+              <h3 className="text-base font-black text-slate-900">恒大文旅城邻里拼车群</h3>
               <p className="text-xs text-slate-500 mt-1">
-                仅限文旅城1/2/3/4期业主及常住通勤邻居加入
+                文旅城及周边通勤邻里互助群
               </p>
             </div>
 
             {/* QR Code Container */}
             <div className="rounded-2xl border-2 border-dashed border-emerald-300/80 bg-emerald-50/40 p-5 inline-block mx-auto">
               <div className="h-44 w-44 bg-white p-2 rounded-xl shadow-xs border border-slate-200 flex flex-col items-center justify-center relative">
-                {/* SVG styled QR representation */}
                 <svg className="w-full h-full text-slate-900" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm14 0h-2v2h-2v2h4v-4zm-4 4h-2v2h2v-2zm4 2h2v-2h-2v2zm2-4h2v-2h-2v2zm-2-2h2v-2h-2v2zM6 6h2v2H6V6zm12 0h2v2h-2V6zM6 18h2v2H6v-2zm7-9h2v2h-2V9zm-2 2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2z"/>
                 </svg>
@@ -341,24 +307,17 @@ export default function WeChatProfileView({
                   </div>
                 </div>
               </div>
-              <div className="text-[11px] text-emerald-800 font-bold mt-2">
-                群管理员微信：hd_wlc_admin
-              </div>
             </div>
-
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              微信扫一扫上方二维码进群，或点击下方按钮复制管理员微信进群
-            </p>
 
             <div className="flex gap-2 pt-1">
               <button
                 onClick={() => {
                   navigator.clipboard?.writeText('hd_wlc_admin');
-                  showToast('已复制管理员微信：hd_wlc_admin');
+                  showToast('已复制微信：hd_wlc_admin');
                 }}
                 className="flex-1 rounded-2xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-md hover:bg-emerald-700 active:scale-95 transition"
               >
-                复制管理员微信号
+                复制群管理员微信
               </button>
               <button
                 onClick={() => setShowQrModal(false)}

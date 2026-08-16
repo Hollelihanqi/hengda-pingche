@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Car,
   Users,
@@ -26,12 +27,9 @@ import {
 import WeChatAppContainer from '@/components/wechat/WeChatAppContainer';
 import WeChatProfileView from '@/components/wechat/WeChatProfileView';
 import WeChatShareModal from '@/components/wechat/WeChatShareModal';
-import { WeChatTabType } from '@/components/wechat/WeChatTabBar';
-import DynamicIslandAlert from '@/components/DynamicIslandAlert';
+import type { WeChatTabType } from '@/components/wechat/WeChatTabBar';
 import MapView from '@/components/MapView';
 import TripCard from '@/components/TripCard';
-import BookingModal from '@/components/BookingModal';
-import PublishModal from '@/components/PublishModal';
 import TripDetailModal from '@/components/TripDetailModal';
 import AiAssistantDrawer from '@/components/AiAssistantDrawer';
 import NeighborVerifyModal from '@/components/NeighborVerifyModal';
@@ -42,13 +40,12 @@ import { CarpoolTrip } from '@/types/carpool';
 import { COMMUNITY_COMMUTE_TIPS } from '@/lib/mockData';
 
 export default function CarpoolHomePage() {
+  const router = useRouter();
   const {
     trips,
     currentUser,
     addTrip,
     cancelTrip,
-    bookSeat,
-    cancelBooking,
     updateUser,
     resetToSampleData,
   } = useCarpoolStore();
@@ -58,15 +55,10 @@ export default function CarpoolHomePage() {
 
   // Filters
   const [filterType, setFilterType] = useState<'all' | 'driver_offer' | 'passenger_request'>('all');
-  const [filterDirection, setFilterDirection] = useState<'all' | 'into_city' | 'out_city' | 'metro_transfer'>('all');
-  const [filterZone, setFilterZone] = useState<string>('all');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [filterTimeSlot, setFilterTimeSlot] = useState<'all' | 'morning_peak' | 'evening_peak'>('all');
 
   // Modal States
   const [selectedTripForDetail, setSelectedTripForDetail] = useState<CarpoolTrip | null>(null);
-  const [selectedTripForBooking, setSelectedTripForBooking] = useState<CarpoolTrip | null>(null);
-  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isAiDrawerOpen, setIsAiDrawerOpen] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isCharterModalOpen, setIsCharterModalOpen] = useState(false);
@@ -80,27 +72,6 @@ export default function CarpoolHomePage() {
 
       // Filter by role type (车找人 vs 人找车)
       if (filterType !== 'all' && trip.type !== filterType) return false;
-
-      // Filter by direction
-      if (filterDirection !== 'all' && trip.direction !== filterDirection) return false;
-
-      // Filter by destination zone
-      if (filterZone !== 'all') {
-        const destZoneMatch =
-          trip.destination.zone.includes(filterZone) ||
-          trip.destination.name.includes(filterZone) ||
-          trip.origin.name.includes(filterZone);
-        if (!destZoneMatch) return false;
-      }
-
-      // Filter by time slot
-      if (filterTimeSlot === 'morning_peak') {
-        const hour = parseInt(trip.departureTime.split(':')[0], 10);
-        if (hour < 6 || hour > 9) return false;
-      } else if (filterTimeSlot === 'evening_peak') {
-        const hour = parseInt(trip.departureTime.split(':')[0], 10);
-        if (hour < 17 || hour > 21) return false;
-      }
 
       // Filter by search keyword
       if (searchKeyword.trim()) {
@@ -116,109 +87,51 @@ export default function CarpoolHomePage() {
 
       return true;
     });
-  }, [trips, filterType, filterDirection, filterZone, filterTimeSlot, searchKeyword]);
+  }, [trips, filterType, searchKeyword]);
 
-  // Active upcoming trip for Dynamic Island
-  const activeUpcomingTrip = useMemo(() => {
-    const booked = trips.find((t) => t.bookings.some((b) => b.passengerId === currentUser.id));
-    return booked || trips[0];
-  }, [trips, currentUser]);
-
-  // Active booking count for badge
-  const activeBookingCount = useMemo(() => {
-    return trips.filter((t) => t.bookings.some((b) => b.passengerId === currentUser.id)).length;
+  const myPublishedCount = useMemo(() => {
+    return trips.filter((t) => t.publisher.id === currentUser.id).length;
   }, [trips, currentUser]);
 
   return (
     <WeChatAppContainer
       activeTab={activeTab}
       onChangeTab={(tab) => setActiveTab(tab)}
-      onOpenPublish={() => setIsPublishModalOpen(true)}
+      onOpenPublish={() => router.push('/publish')}
       onOpenShare={() => setIsShareModalOpen(true)}
       onReload={() => resetToSampleData()}
       onOpenAbout={() => setIsAboutModalOpen(true)}
-      bookingCount={activeBookingCount}
+      bookingCount={myPublishedCount}
       isVerified={currentUser.isVerifiedOwner}
     >
       <div className="space-y-3.5">
-        {/* Apple Dynamic Island / Top Quick Action */}
-        <DynamicIslandAlert
-          activeTrip={activeUpcomingTrip}
-          onOpenTrip={(t) => setSelectedTripForDetail(t)}
-        />
-
-        {/* TAB 1: 拼车大厅 (HALL / FEED) */}
+        {/* TAB 1: 拼车大厅 (FEED VIEW) */}
         {activeTab === 'hall' && (
-          <div className="space-y-3.5 animate-in fade-in duration-200">
-            {/* WeChat Banner Card */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-slate-900 p-4 text-white shadow-md">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold backdrop-blur-md">
-                    🏰 恒大文旅城业主专线
-                  </span>
-                  <span className="rounded-full bg-emerald-400/30 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
-                    0元公益互助
-                  </span>
-                </div>
-                <h2 className="text-lg font-black tracking-tight pt-1">
-                  早高峰快速进城 · 邻里拼车
-                </h2>
-                <p className="text-[11px] text-emerald-100/90 leading-relaxed">
-                  专为文旅城1~4期业主打造，解决未通地铁通勤难，邻里互助走正阳大道与绕城高速。
-                </p>
-              </div>
-
-              {/* Quick Action Matrix in Banner */}
-              <div className="mt-3 flex items-center gap-2 pt-2 border-t border-white/15 text-xs">
-                <button
-                  onClick={() => setIsPublishModalOpen(true)}
-                  className="flex-1 flex items-center justify-center gap-1.5 rounded-2xl bg-white py-2 font-bold text-slate-900 shadow-sm active:scale-95 transition"
-                >
-                  <Plus className="h-4 w-4 text-emerald-600 stroke-[2.5px]" />
-                  发车 / 求拼
-                </button>
-                <button
-                  onClick={() => setIsAiDrawerOpen(true)}
-                  className="flex items-center gap-1 rounded-2xl border border-white/30 bg-white/15 px-3 py-2 font-bold text-white backdrop-blur-md active:scale-95 transition"
-                >
-                  <Sparkles className="h-4 w-4 text-emerald-300" />
-                  AI 匹配
-                </button>
-                <button
-                  onClick={() => setIsShareModalOpen(true)}
-                  className="flex items-center gap-1 rounded-2xl border border-white/30 bg-white/15 px-3 py-2 font-bold text-white backdrop-blur-md active:scale-95 transition"
-                >
-                  <Share2 className="h-4 w-4 text-white" />
-                  发群
-                </button>
-              </div>
-            </div>
-
-            {/* WeChat Search & Filter Capsule */}
-            <div className="rounded-3xl border border-slate-200/80 bg-white p-3.5 shadow-xs space-y-2.5">
-              {/* Search Bar */}
+          <div className="space-y-3 animate-in fade-in duration-200">
+            {/* Search & Filter Bar */}
+            <div className="rounded-2xl bg-white p-3 border border-slate-200/80 shadow-xs space-y-2.5">
+              {/* Search input */}
               <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
                   value={searchKeyword}
                   onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="搜索目的地（如：软件新城 / 运动公园 / 绿地）"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-emerald-500 focus:outline-none"
+                  placeholder="搜索目的地（如：软件新城、绿地双子塔、华为...）"
+                  className="w-full rounded-xl bg-slate-100/80 py-2 pl-9 pr-8 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
                 />
                 {searchKeyword && (
                   <button
                     onClick={() => setSearchKeyword('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 hover:text-slate-600"
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
                   >
-                    清空
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Filter Tabs: All vs Driver vs Passenger */}
-              <div className="flex gap-1.5">
+              {/* Segmented Type Switcher: 全部 / 🚗 车找人 / 🙋 人找车 */}
+              <div className="flex bg-slate-100/90 p-1 rounded-xl gap-1">
                 {[
                   { id: 'all', label: '全部' },
                   { id: 'driver_offer', label: '🚗 车找人' },
@@ -227,73 +140,15 @@ export default function CarpoolHomePage() {
                   <button
                     key={item.id}
                     onClick={() => setFilterType(item.id as any)}
-                    className={`flex-1 rounded-xl py-1.5 text-xs font-semibold transition ${
+                    className={`flex-1 rounded-lg py-1.5 text-xs font-semibold transition-all ${
                       filterType === item.id
-                        ? 'bg-slate-900 text-white shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-white text-slate-900 shadow-xs font-bold'
+                        : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
                     {item.label}
                   </button>
                 ))}
-              </div>
-
-              {/* Zone Chips */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
-                {[
-                  { id: 'all', label: '全部路线' },
-                  { id: '高新区', label: '🏢 高新/软件新城' },
-                  { id: '地铁接驳', label: '🚇 地铁2号线运动公园' },
-                  { id: '经开区', label: '🏛️ 经开行政中心' },
-                  { id: '钟楼小寨', label: '🔔 钟楼小寨' },
-                ].map((zone) => (
-                  <button
-                    key={zone.id}
-                    onClick={() => setFilterZone(zone.id)}
-                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition ${
-                      filterZone === zone.id
-                        ? 'bg-emerald-600 text-white font-bold shadow-2xs'
-                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {zone.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Time Slots */}
-              <div className="flex items-center gap-1.5 pt-1 border-t border-slate-100 text-[11px]">
-                <span className="text-slate-400 font-semibold">时段：</span>
-                <button
-                  onClick={() => setFilterTimeSlot('all')}
-                  className={`rounded-lg px-2 py-0.5 transition ${
-                    filterTimeSlot === 'all'
-                      ? 'bg-slate-200 font-bold text-slate-900'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  全天
-                </button>
-                <button
-                  onClick={() => setFilterTimeSlot('morning_peak')}
-                  className={`rounded-lg px-2 py-0.5 transition ${
-                    filterTimeSlot === 'morning_peak'
-                      ? 'bg-emerald-100 font-bold text-emerald-900'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  🌅 早高峰 (06:30-09:00)
-                </button>
-                <button
-                  onClick={() => setFilterTimeSlot('evening_peak')}
-                  className={`rounded-lg px-2 py-0.5 transition ${
-                    filterTimeSlot === 'evening_peak'
-                      ? 'bg-indigo-100 font-bold text-indigo-900'
-                      : 'text-slate-500'
-                  }`}
-                >
-                  🌃 晚高峰
-                </button>
               </div>
             </div>
 
@@ -322,10 +177,10 @@ export default function CarpoolHomePage() {
                 </div>
                 <h4 className="text-xs font-bold text-slate-900">未找到匹配的拼车行程</h4>
                 <p className="text-[11px] text-slate-400">
-                  您可以尝试更换搜索词，或自己发布一条行程让邻居看到！
+                  您可以尝试更换搜索词，或自己发布一条信息让邻居看到！
                 </p>
                 <button
-                  onClick={() => setIsPublishModalOpen(true)}
+                  onClick={() => router.push('/publish')}
                   className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-xs"
                 >
                   立即发布发车/求车
@@ -338,7 +193,6 @@ export default function CarpoolHomePage() {
                     key={trip.id}
                     trip={trip}
                     isSelected={selectedTripForDetail?.id === trip.id}
-                    onBook={(t) => setSelectedTripForBooking(t)}
                     onViewDetail={(t) => setSelectedTripForDetail(t)}
                   />
                 ))}
@@ -354,15 +208,15 @@ export default function CarpoolHomePage() {
               <MapView
                 selectedTrip={selectedTripForDetail || filteredTrips[0] || trips[0]}
                 allTrips={trips}
-                className="h-[380px] sm:h-[480px] w-full"
+                onSelectTrip={(trip) => setSelectedTripForDetail(trip)}
               />
             </div>
 
-            {/* Commute Guide Cards */}
-            <div className="rounded-3xl bg-white p-4 border border-slate-200/80 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <TrendingUp className="h-4 w-4 text-emerald-600" />
+            {/* Commute Corridor Tips Card */}
+            <div className="rounded-3xl bg-white p-4 border border-slate-200/80 shadow-xs space-y-2.5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <Navigation className="h-3.5 w-3.5 text-emerald-600" />
                   恒大文旅城 进城快速通道走廊
                 </span>
                 <span className="text-[10px] text-slate-400">避堵指南</span>
@@ -387,16 +241,15 @@ export default function CarpoolHomePage() {
           </div>
         )}
 
-        {/* TAB 3: 我的行程 (MY TRIPS / BOOKINGS) */}
+        {/* TAB 3: 我的发布 (MY PUBLISHED POSTS) */}
         {activeTab === 'my_trips' && (
           <div className="animate-in fade-in duration-200">
             <MyTripsView
               trips={trips}
               currentUser={currentUser}
-              onCancelBooking={(tripId, bookingId) => cancelBooking(tripId, bookingId)}
               onCancelTrip={(tripId) => cancelTrip(tripId)}
               onSelectTrip={(t) => setSelectedTripForDetail(t)}
-              onOpenPublish={() => setIsPublishModalOpen(true)}
+              onOpenPublish={() => router.push('/publish')}
             />
           </div>
         )}
@@ -418,34 +271,12 @@ export default function CarpoolHomePage() {
         )}
 
         {/* MODALS */}
-        {/* Booking Sheet Modal */}
-        <BookingModal
-          trip={selectedTripForBooking}
-          currentUser={currentUser}
-          isOpen={!!selectedTripForBooking}
-          onClose={() => setSelectedTripForBooking(null)}
-          onConfirmBooking={(tripId, bookingData) => {
-            return bookSeat(tripId, bookingData);
-          }}
-        />
-
-        {/* Publish Trip Modal */}
-        <PublishModal
-          currentUser={currentUser}
-          isOpen={isPublishModalOpen}
-          onClose={() => setIsPublishModalOpen(false)}
-          onPublish={(newTrip) => {
-            addTrip(newTrip);
-          }}
-        />
-
         {/* Trip Detail Modal */}
         <TripDetailModal
           trip={selectedTripForDetail}
           currentUser={currentUser}
           isOpen={!!selectedTripForDetail}
           onClose={() => setSelectedTripForDetail(null)}
-          onBook={(t) => setSelectedTripForBooking(t)}
           onCancelTrip={(tripId) => cancelTrip(tripId)}
         />
 
@@ -454,9 +285,8 @@ export default function CarpoolHomePage() {
           isOpen={isAiDrawerOpen}
           onClose={() => setIsAiDrawerOpen(false)}
           trips={trips}
-          onApplyRecommendation={({ keyword, timeSlot }) => {
+          onApplyRecommendation={({ keyword }) => {
             if (keyword) setSearchKeyword(keyword);
-            if (timeSlot) setFilterTimeSlot(timeSlot as any);
             setActiveTab('hall');
           }}
         />
@@ -494,23 +324,28 @@ export default function CarpoolHomePage() {
               <div>
                 <h3 className="text-base font-black text-slate-900">恒大文旅城邻里拼车</h3>
                 <p className="text-xs text-slate-500 mt-1">
-                  西安恒大文化旅游城业主专属通勤互助小程序
+                  西安恒大文化旅游城业主专属通勤互助信息平台
                 </p>
-                <div className="inline-block mt-2 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                  v1.2.0 · 0元公益非营运
-                </div>
               </div>
 
-              <div className="text-left bg-slate-50 rounded-2xl p-3.5 text-xs text-slate-600 space-y-1.5 border border-slate-100">
-                <div className="font-bold text-slate-800">📌 小程序发起宗旨：</div>
-                <p className="text-[11px] leading-relaxed">
-                  本小程序由文旅城业主自发共建，致力于解决社区距离市区远、地铁未接驳的通勤痛点。通过邻里合乘分担出行，全程0元互助，严禁任何形式非法营运。
-                </p>
+              <div className="rounded-2xl bg-slate-50 p-3.5 text-left text-xs text-slate-600 space-y-1.5 border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">服务区域</span>
+                  <span className="font-bold text-slate-800">西安恒大文化旅游城 (1~5期)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">定位</span>
+                  <span className="font-bold text-emerald-700">纯公益 · 邻里信息板</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400">联系方式</span>
+                  <span className="font-bold text-slate-800">一键直接电话呼叫</span>
+                </div>
               </div>
 
               <button
                 onClick={() => setIsAboutModalOpen(false)}
-                className="w-full rounded-2xl bg-slate-900 py-3 text-xs font-bold text-white hover:bg-slate-800 active:scale-95 transition"
+                className="w-full rounded-2xl bg-slate-900 py-3 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition"
               >
                 我知道了
               </button>

@@ -1,0 +1,9 @@
+{
+  "name": "cancelTrip",
+  "version": "1.0.0",
+  "description": "微信云函数 - 取消下架拼车",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

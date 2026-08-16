@@ -110,7 +110,7 @@ export default function BookingModal({
                 <h3 className="text-lg font-bold text-slate-900">
                   {isDriverOffer ? '预约车主同行' : '响应乘客拼车需求'}
                 </h3>
-                <p className="text-xs text-slate-500">恒大文旅城邻里互助 · 0元公益出行</p>
+                <p className="text-xs text-slate-500">恒大文旅城邻里顺路拼车</p>
               </div>
             </div>
 
@@ -213,8 +213,8 @@ export default function BookingModal({
                 />
               </div>
 
-              {/* Non-profit Safe Carpool Check */}
-              <div className="rounded-xl bg-amber-50/70 p-3 border border-amber-200/60">
+              {/* Safe Carpool Check */}
+              <div className="rounded-xl bg-slate-50 p-3 border border-slate-200">
                 <label className="flex items-start gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -222,10 +222,9 @@ export default function BookingModal({
                     onChange={(e) => setAgreedTerms(e.target.checked)}
                     className="mt-0.5 h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                   />
-                  <div className="text-[11px] text-amber-900 leading-tight">
-                    <span className="font-bold">恒大文旅城邻里公益互助声明：</span>
-                    本拼车平台为小区业主互助性质，<strong>不设任何支付、打赏与营运收费</strong>
-                    。双方自愿同行，准时守信，共同维护社区友好出行。
+                  <div className="text-[11px] text-slate-700 leading-tight">
+                    <span className="font-bold">邻里拼车互助约定：</span>
+                    双方自愿顺路同行，准时在指定门岗等候，文明礼让，共同维护良好乘车环境。
                   </div>
                 </label>
               </div>
@@ -243,7 +242,7 @@ export default function BookingModal({
                   type="submit"
                   className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-semibold text-white hover:bg-emerald-700 transition shadow-sm"
                 >
-                  确认免费预约
+                  确认预约同行
                 </button>
               </div>
             </form>

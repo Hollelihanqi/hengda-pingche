@@ -4,12 +4,10 @@
     <!-- 顶部宣传卡片 -->
     <view class="banner-card">
       <view class="banner-badge-row">
-        <text class="banner-tag">🏰 文旅城业主通勤专线</text>
-        <text class="free-badge">0元公益互助</text>
+        <text class="banner-tag">🏰 文旅城拼车专线</text>
+        <text class="free-badge">邻里顺路</text>
       </view>
       <view class="banner-title">早晚高峰 · 邻里拼车大厅</view>
-      <view class="banner-desc">覆盖恒大文旅城 1~4 期，直达高新软件新城、经开及地铁 2 号线接驳。</view>
-      <button class="btn-publish" @click="goToPublish">+ 发布发车 / 求拼</button>
     </view>
 
     <!-- 搜索筛选 -->
@@ -78,7 +76,10 @@
         <!-- 底部 -->
         <view class="card-footer">
           <text class="route-desc">🛣️ {{ item.routeHighway }}</text>
-          <text class="seat-badge">余 {{ item.availableSeats }} 席</text>
+          <view class="footer-right">
+            <text class="price-badge" v-if="item.price">¥{{ item.price }}/位</text>
+            <text class="seat-badge">余 {{ item.availableSeats }} 席</text>
+          </view>
         </view>
 
         <!-- 预约操作 -->
@@ -88,7 +89,7 @@
             :disabled="item.availableSeats <= 0"
             @click="bookTrip(item)"
           >
-            {{ item.availableSeats > 0 ? '一键免费预约' : '已满员' }}
+            {{ item.availableSeats > 0 ? '一键预约同行' : '已满员' }}
           </button>
         </view>
       </view>
@@ -105,9 +106,69 @@ const trips = ref<CarpoolTrip[]>([]);
 const filterType = ref<'all' | 'driver_offer' | 'passenger_request'>('all');
 const searchKeyword = ref<string>('');
 
+const defaultTrips: CarpoolTrip[] = [
+  {
+    id: 'trip_001',
+    type: 'driver_offer',
+    publisher: {
+      id: 'usr_001',
+      name: '张宇轩 (邻居)',
+      phone: '18729391167',
+      communityPhase: '恒大文旅城·1期',
+      buildingUnit: '3号楼1单元',
+      isVerifiedOwner: true,
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      creditScore: 99,
+      carModel: '特斯拉 Model Y (陕A·D***8)'
+    },
+    departureDate: '2026-08-16',
+    departureTime: '07:30',
+    origin: { name: '恒大文旅城·1期星空门岗', address: '1期东主入口' },
+    destination: { name: '高新·软件新城 (环普科技园)', address: '天谷八路A座' },
+    routeHighway: '正阳大道 ➔ 绕城高速 ➔ 丈八立交',
+    availableSeats: 2,
+    totalSeats: 3,
+    price: 15,
+    preferences: [],
+    note: '',
+    bookings: []
+  },
+  {
+    id: 'trip_002',
+    type: 'driver_offer',
+    publisher: {
+      id: 'usr_002',
+      name: '陈思远 (邻居)',
+      phone: '13600009912',
+      communityPhase: '恒大文旅城·2期',
+      buildingUnit: '5号楼2单元',
+      isVerifiedOwner: true,
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+      creditScore: 98,
+      carModel: '比亚迪 汉EV (陕A·F***3)'
+    },
+    departureDate: '2026-08-16',
+    departureTime: '07:10',
+    origin: { name: '恒大文旅城·2期童世界主门', address: '2期大门' },
+    destination: { name: '地铁2号线·运动公园站 (D口)', address: '凤城十路' },
+    routeHighway: '西铜快速干线 ➔ 未央立交',
+    availableSeats: 3,
+    totalSeats: 3,
+    price: 10,
+    preferences: [],
+    note: '',
+    bookings: []
+  }
+];
+
 function loadTrips(): void {
-  const data = uni.getStorageSync('hd_trips') || [];
-  trips.value = data;
+  const data = uni.getStorageSync('hd_trips');
+  if (data && data.length > 0) {
+    trips.value = data;
+  } else {
+    trips.value = defaultTrips;
+    uni.setStorageSync('hd_trips', defaultTrips);
+  }
 }
 
 onShow(() => {
@@ -142,49 +203,15 @@ function goToDetail(id: string): void {
 }
 
 function bookTrip(trip: CarpoolTrip): void {
+  if (trip.availableSeats <= 0) return;
   uni.showModal({
-    title: '确认免费预约行程',
-    content: `预约 ${trip.departureTime} 从 [${trip.origin.name}] ➔ [${trip.destination.name}]？\n(全程0元公益互助)`,
-    confirmText: '立即预约',
-    confirmColor: '#059669',
+    title: '确认预约同行',
+    content: `确定预约【${trip.departureTime} ${trip.origin.name} ➔ ${trip.destination.name}】吗？`,
     success: (res) => {
       if (res.confirm) {
-        const code = Math.floor(100000 + Math.random() * 900000).toString();
-        const newBooking: BookingRecord = {
-          id: 'book-' + Date.now(),
-          tripId: trip.id,
-          passengerId: 'user-me',
-          passengerName: '业主张先生',
-          passengerPhone: '138****9527',
-          seatsBooked: 1,
-          boardingCode: code,
-          status: 'confirmed',
-          createdAt: new Date().toISOString(),
-          tripTime: trip.departureTime,
-          origin: trip.origin.name,
-          destination: trip.destination.name
-        };
-
-        // 写入预约记录
-        const bookings: BookingRecord[] = uni.getStorageSync('hd_my_bookings') || [];
-        bookings.unshift(newBooking);
-        uni.setStorageSync('hd_my_bookings', bookings);
-
-        // 减少余座
-        const all = trips.value.map(t => {
-          if (t.id === trip.id) {
-            return { ...t, availableSeats: Math.max(0, t.availableSeats - 1) };
-          }
-          return t;
-        });
-        uni.setStorageSync('hd_trips', all);
-        trips.value = all;
-
-        uni.showToast({
-          title: `预约成功！核验码:${code}`,
-          icon: 'none',
-          duration: 3000
-        });
+        trip.availableSeats -= 1;
+        uni.setStorageSync('hd_trips', trips.value);
+        uni.showToast({ title: '预约成功！', icon: 'success' });
       }
     }
   });
@@ -193,52 +220,52 @@ function bookTrip(trip: CarpoolTrip): void {
 
 <style scoped>
 .container {
-  padding: 24rpx;
+  padding: 20rpx;
+  background-color: #F8FAFC;
+  min-height: 100vh;
 }
 .banner-card {
-  background: linear-gradient(135deg, #059669 0%, #0d9488 60%, #0f172a 100%);
-  border-radius: 32rpx;
+  background: linear-gradient(135deg, #059669 0%, #0D9488 50%, #0F172A 100%);
+  border-radius: 28rpx;
   padding: 32rpx;
   color: #FFFFFF;
   margin-bottom: 24rpx;
-  box-shadow: 0 8rpx 20rpx rgba(5, 150, 105, 0.2);
 }
 .banner-badge-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 16rpx;
 }
 .banner-tag {
-  font-size: 22rpx;
   background: rgba(255, 255, 255, 0.2);
-  padding: 6rpx 16rpx;
+  font-size: 20rpx;
+  padding: 4rpx 16rpx;
   border-radius: 20rpx;
 }
 .free-badge {
+  background: rgba(52, 211, 153, 0.3);
+  color: #A7F3D0;
   font-size: 20rpx;
-  color: #6EE7B7;
-  border: 1rpx solid #6EE7B7;
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
 }
 .banner-title {
-  font-size: 34rpx;
-  font-weight: bold;
-  margin-top: 16rpx;
+  font-size: 36rpx;
+  font-weight: 900;
+  margin-bottom: 8rpx;
 }
 .banner-desc {
-  font-size: 24rpx;
-  color: #D1FAE5;
-  margin-top: 8rpx;
-  line-height: 1.5;
+  font-size: 22rpx;
+  opacity: 0.85;
+  margin-bottom: 24rpx;
 }
 .btn-publish {
-  background-color: #FFFFFF;
-  color: #059669;
+  background: #FFFFFF;
+  color: #0F172A;
   font-weight: bold;
   font-size: 26rpx;
   border-radius: 20rpx;
-  margin-top: 24rpx;
+  padding: 12rpx 0;
   border: none;
 }
 .search-box {
@@ -247,87 +274,84 @@ function bookTrip(trip: CarpoolTrip): void {
 .search-input {
   background: #FFFFFF;
   border-radius: 20rpx;
-  padding: 18rpx 24rpx;
-  font-size: 26rpx;
+  padding: 16rpx 24rpx;
+  font-size: 24rpx;
   border: 1rpx solid #E2E8F0;
 }
 .type-tabs {
   display: flex;
   background: #E2E8F0;
-  border-radius: 20rpx;
+  border-radius: 18rpx;
   padding: 6rpx;
   margin-bottom: 24rpx;
 }
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 14rpx 0;
-  font-size: 26rpx;
+  font-size: 24rpx;
+  padding: 12rpx 0;
   color: #64748B;
-  border-radius: 16rpx;
+  border-radius: 14rpx;
 }
 .tab-item.active {
-  background: #0F172A;
-  color: #FFFFFF;
+  background: #FFFFFF;
+  color: #0F172A;
   font-weight: bold;
 }
 .trip-card {
   background: #FFFFFF;
   border-radius: 24rpx;
-  padding: 28rpx;
+  padding: 24rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
+  border: 1rpx solid #E2E8F0;
 }
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #F1F5F9;
 }
 .publisher-info {
   display: flex;
   align-items: center;
+  gap: 12rpx;
 }
 .avatar {
-  width: 72rpx;
-  height: 72rpx;
+  width: 60rpx;
+  height: 60rpx;
   border-radius: 50%;
-  margin-right: 16rpx;
+}
+.user-meta {
+  display: flex;
+  flex-direction: column;
 }
 .user-name {
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #0F172A;
-  display: block;
 }
 .user-phase {
-  font-size: 22rpx;
+  font-size: 18rpx;
   color: #64748B;
-  display: block;
 }
-.time-badge {
-  background: #ECFDF5;
-  color: #059669;
-  padding: 8rpx 16rpx;
-  border-radius: 12rpx;
+.time-text {
+  font-size: 26rpx;
   font-weight: bold;
-  font-size: 24rpx;
+  color: #0F172A;
 }
 .route-box {
   margin: 20rpx 0;
-  padding: 16rpx;
-  background: #F8FAFC;
-  border-radius: 16rpx;
 }
 .route-point {
   display: flex;
   align-items: center;
-  font-size: 26rpx;
+  gap: 12rpx;
 }
 .dot {
   width: 14rpx;
   height: 14rpx;
   border-radius: 50%;
-  margin-right: 16rpx;
 }
 .dot-green { background: #10B981; }
 .dot-red { background: #EF4444; }
@@ -336,37 +360,46 @@ function bookTrip(trip: CarpoolTrip): void {
   height: 20rpx;
   background: #CBD5E1;
   margin-left: 6rpx;
-  margin-top: 4rpx;
-  margin-bottom: 4rpx;
 }
-.font-bold {
-  font-weight: bold;
+.point-name {
+  font-size: 24rpx;
+  color: #334155;
 }
+.font-bold { font-weight: bold; }
 .card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #64748B;
-  border-top: 1rpx solid #F1F5F9;
-  padding-top: 16rpx;
+  padding-top: 12rpx;
+}
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.price-badge {
+  background: #FEF3C7;
+  color: #B45309;
+  font-weight: bold;
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
 }
 .seat-badge {
   color: #059669;
   font-weight: bold;
-  background: #F0FDF4;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
 }
 .action-box {
-  margin-top: 20rpx;
+  margin-top: 16rpx;
 }
 .btn-book {
   background: #059669;
   color: #FFFFFF;
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: bold;
-  border-radius: 18rpx;
-  border: none;
+  border-radius: 16rpx;
+  padding: 8rpx 0;
 }
 </style>

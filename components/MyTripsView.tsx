@@ -1,25 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Car,
   Clock,
   MapPin,
-  Calendar,
   Users,
-  CheckCircle2,
   Trash2,
-  ChevronRight,
-  ShieldCheck,
-  QrCode,
-  AlertCircle,
+  Phone,
+  Plus,
+  ArrowRight,
 } from 'lucide-react';
-import { CarpoolTrip, UserProfile, PassengerBooking } from '@/types/carpool';
+import { CarpoolTrip, UserProfile } from '@/types/carpool';
 
 interface MyTripsViewProps {
   trips: CarpoolTrip[];
   currentUser: UserProfile;
-  onCancelBooking: (tripId: string, bookingId: string) => void;
   onCancelTrip: (tripId: string) => void;
   onSelectTrip: (trip: CarpoolTrip) => void;
   onOpenPublish: () => void;
@@ -28,222 +24,125 @@ interface MyTripsViewProps {
 export default function MyTripsView({
   trips,
   currentUser,
-  onCancelBooking,
   onCancelTrip,
   onSelectTrip,
   onOpenPublish,
 }: MyTripsViewProps) {
-  const [activeTab, setActiveTab] = useState<'as_passenger' | 'as_driver'>('as_passenger');
-
-  // Bookings where current user is passenger
-  const myBookings: { trip: CarpoolTrip; booking: PassengerBooking }[] = [];
-  trips.forEach((trip) => {
-    trip.bookings.forEach((booking) => {
-      if (booking.passengerId === currentUser.id) {
-        myBookings.push({ trip, booking });
-      }
-    });
-  });
-
   // Trips published by current user
   const myPublishedTrips = trips.filter((t) => t.publisher.id === currentUser.id);
 
   return (
     <div className="space-y-4">
-      {/* Apple Segmented Switcher */}
-      <div className="flex rounded-2xl bg-slate-100 p-1">
+      {/* Header Info */}
+      <div className="flex items-center justify-between bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900">我发布的拼车信息</h3>
+          <p className="text-xs text-slate-400 mt-0.5">
+            共发布 {myPublishedTrips.length} 条信息 · 邻里随时可电话联系您
+          </p>
+        </div>
         <button
-          onClick={() => setActiveTab('as_passenger')}
-          className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition ${
-            activeTab === 'as_passenger'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
+          onClick={onOpenPublish}
+          className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-xs"
         >
-          <Users className="h-3.5 w-3.5 text-purple-600" />
-          我预约的行程 ({myBookings.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('as_driver')}
-          className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition ${
-            activeTab === 'as_driver'
-              ? 'bg-white text-slate-900 shadow-sm'
-              : 'text-slate-500 hover:text-slate-900'
-          }`}
-        >
-          <Car className="h-3.5 w-3.5 text-emerald-600" />
-          我发布的车次 ({myPublishedTrips.length})
+          <Plus className="h-4 w-4" />
+          <span>新发布</span>
         </button>
       </div>
 
-      {/* Passenger View */}
-      {activeTab === 'as_passenger' && (
-        <div className="space-y-3">
-          {myBookings.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-600">
-                <Users className="h-6 w-6" />
-              </div>
-              <h4 className="mt-3 text-sm font-bold text-slate-900">暂无预约的行程</h4>
-              <p className="text-xs text-slate-400 mt-1">
-                去拼车大厅看看文旅城邻居们的发车计划吧！
-              </p>
+      {/* List */}
+      <div className="space-y-3">
+        {myPublishedTrips.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <Car className="h-6 w-6" />
             </div>
-          ) : (
-            myBookings.map(({ trip, booking }) => (
+            <h4 className="text-sm font-bold text-slate-900">暂无发布的拼车信息</h4>
+            <p className="text-xs text-slate-400 max-w-xs mx-auto">
+              您是有车车主还是求拼乘客？点击下方按钮即可一键发布通勤信息！
+            </p>
+            <button
+              onClick={onOpenPublish}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition"
+            >
+              <Plus className="h-4 w-4" />
+              <span>立即发布拼车</span>
+            </button>
+          </div>
+        ) : (
+          myPublishedTrips.map((trip) => {
+            const isDriver = trip.type === 'driver_offer';
+            return (
               <div
-                key={booking.id}
+                key={trip.id}
                 onClick={() => onSelectTrip(trip)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-xs transition hover:border-emerald-300 hover:shadow-md"
+                className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs transition hover:border-emerald-300 hover:shadow-md"
               >
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                      预约成功
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-bold ${
+                        isDriver
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200/60'
+                          : 'bg-purple-50 text-purple-700 border border-purple-200/60'
+                      }`}
+                    >
+                      {isDriver ? <Car className="h-3 w-3" /> : <Users className="h-3 w-3" />}
+                      {isDriver ? '车找人' : '人找车'}
                     </span>
-                    <span className="text-xs font-semibold text-slate-800">
+                    <span className="text-xs font-bold text-slate-900 font-mono">
                       {trip.departureDate} {trip.departureTime}
                     </span>
                   </div>
 
+                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                    {isDriver ? `余 ${trip.availableSeats || trip.totalSeats} 席` : `求 ${trip.totalSeats || 1} 人`}
+                  </span>
+                </div>
+
+                {/* Route */}
+                <div className="py-2.5 space-y-1.5 text-xs">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded-md">
-                      乘车码 {booking.boardingCode}
-                    </span>
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="font-bold text-slate-800 truncate">{trip.origin.name}</span>
                   </div>
-                </div>
-
-                {/* Body */}
-                <div className="my-3 space-y-1.5 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-slate-900">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>{booking.pickupPoint}</span>
-                    <span className="text-slate-300">➔</span>
-                    <span>{trip.destination.name}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-slate-500 pt-1">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={trip.publisher.avatar}
-                        alt={trip.publisher.name}
-                        className="h-5 w-5 rounded-full"
-                      />
-                      <span>车主：{trip.publisher.name}</span>
-                      <span>•</span>
-                      <span>{trip.carInfo?.brandModel || '认证私家车'}</span>
-                    </div>
-
-                    <span className="font-semibold text-slate-700">
-                      已约 {booking.seatsBooked} 座
-                    </span>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
-                  <span className="text-[11px] text-slate-400">
-                    上车点：{booking.pickupPoint}
-                  </span>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm('确认取消此预约吗？')) {
-                        onCancelBooking(trip.id, booking.id);
-                      }
-                    }}
-                    className="flex items-center gap-1 text-slate-400 hover:text-red-600 transition text-[11px]"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    取消预约
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {/* Driver View */}
-      {activeTab === 'as_driver' && (
-        <div className="space-y-3">
-          {myPublishedTrips.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                <Car className="h-6 w-6" />
-              </div>
-              <h4 className="mt-3 text-sm font-bold text-slate-900">您暂未发布任何车次</h4>
-              <p className="text-xs text-slate-400 mt-1">
-                每天进城上班有空位？快为同小区的邻居提供便利吧！
-              </p>
-              <button
-                onClick={onOpenPublish}
-                className="mt-4 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 shadow-sm transition"
-              >
-                发布车主发车
-              </button>
-            </div>
-          ) : (
-            myPublishedTrips.map((trip) => (
-              <div
-                key={trip.id}
-                onClick={() => onSelectTrip(trip)}
-                className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-xs hover:border-emerald-300 hover:shadow-md transition"
-              >
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-bold text-blue-700">
-                      {trip.type === 'driver_offer' ? '车主空位' : '求车需求'}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-800">
-                      {trip.departureDate} {trip.departureTime}
-                    </span>
+                    <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                    <span className="font-bold text-slate-900 truncate">{trip.destination.name}</span>
                   </div>
-
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                      trip.availableSeats > 0
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    余 {trip.availableSeats} / {trip.totalSeats} 座
-                  </span>
                 </div>
 
-                <div className="my-3 space-y-1 text-xs">
-                  <div className="font-bold text-slate-900">
-                    {trip.origin.name} ➔ {trip.destination.name}
+                {/* Footer Controls */}
+                <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>发布于 {trip.createdAt || '近期'}</span>
                   </div>
-                  <div className="text-slate-500">{trip.routeHighway}</div>
-                </div>
 
-                {/* Passenger list */}
-                <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs">
-                  <span className="text-slate-500">
-                    已预约乘客：{trip.bookings.length} 位
-                  </span>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (confirm('确认取消此行程吗？')) {
-                        onCancelTrip(trip.id);
-                      }
-                    }}
-                    className="flex items-center gap-1 text-slate-400 hover:text-red-600 transition text-[11px]"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    取消发车
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('确定要下架/删除该条发布信息吗？')) {
+                          onCancelTrip(trip.id);
+                        }
+                      }}
+                      className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-100 transition"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      <span>下架</span>
+                    </button>
+                    <span className="text-xs font-bold text-emerald-600 flex items-center">
+                      查看详情 <ArrowRight className="h-3 w-3 ml-0.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }

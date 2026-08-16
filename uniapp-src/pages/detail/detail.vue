@@ -19,6 +19,11 @@
         <text class="meta-val">{{ trip.routeHighway }}</text>
       </view>
 
+      <view class="meta-row" v-if="trip.price">
+        <text class="meta-label">分摊车费：</text>
+        <text class="meta-val text-amber font-bold">¥{{ trip.price }}/位</text>
+      </view>
+
       <view class="meta-row">
         <text class="meta-label">剩余席位：</text>
         <text class="meta-val text-emerald font-bold">{{ trip.availableSeats }} 席</text>
@@ -26,12 +31,19 @@
 
       <view class="meta-row" v-if="trip.carModel">
         <text class="meta-label">车辆信息：</text>
-        <text class="meta-val">{{ trip.carModel }} ({{ trip.carPlate }})</text>
+        <text class="meta-val">{{ trip.carModel }}</text>
       </view>
 
-      <view class="meta-row">
-        <text class="meta-label">车主留言：</text>
-        <text class="meta-val">{{ trip.note }}</text>
+      <!-- 发布者信息与拨打电话 (页面不暴露明文号码，点击直接呼叫) -->
+      <view class="publisher-bar">
+        <view class="pub-left">
+          <image class="pub-avatar" :src="trip.publisher.avatar" mode="aspectFill" />
+          <view class="pub-info">
+            <text class="pub-name">{{ trip.publisher.name }}</text>
+            <text class="pub-phase">{{ trip.publisher.communityPhase }}</text>
+          </view>
+        </view>
+        <button class="btn-call" @click="makePhoneCall">📞 拨打电话</button>
       </view>
     </view>
 
@@ -52,6 +64,13 @@ onLoad((options: any) => {
   const found = trips.find(t => t.id === id) || trips[0];
   trip.value = found || null;
 });
+
+const makePhoneCall = () => {
+  const phone = trip.value?.publisher?.phone || '18729391167';
+  uni.makePhoneCall({
+    phoneNumber: phone.replace(/[^0-9]/g, '') || '18729391167',
+  });
+};
 
 onShareAppMessage(() => {
   return {
@@ -115,13 +134,57 @@ onShareAppMessage(() => {
 .text-emerald {
   color: #059669;
 }
-.btn-share {
+.text-amber {
+  color: #d97706;
+}
+.publisher-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30rpx;
+  padding-top: 24rpx;
+  border-top: 1rpx solid #F1F5F9;
+}
+.pub-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.pub-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+}
+.pub-info {
+  display: flex;
+  flex-direction: column;
+}
+.pub-name {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #0F172A;
+}
+.pub-phase {
+  font-size: 20rpx;
+  color: #64748B;
+}
+.btn-call {
   background: #059669;
+  color: #FFFFFF;
+  font-size: 24rpx;
+  font-weight: bold;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+}
+.btn-share {
+  background: #0F172A;
   color: #FFFFFF;
   font-weight: bold;
   font-size: 28rpx;
   border-radius: 24rpx;
-  margin-top: 40rpx;
+  margin-top: 30rpx;
   padding: 24rpx 0;
   border: none;
 }

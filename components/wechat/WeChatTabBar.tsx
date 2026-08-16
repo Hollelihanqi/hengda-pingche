@@ -5,18 +5,18 @@ import {
   Car, 
   Map, 
   Plus, 
-  CalendarCheck2, 
+  ClipboardList, 
   User,
-  Sparkles
 } from 'lucide-react';
 
-export type WeChatTabType = 'hall' | 'map' | 'my_trips' | 'profile';
+export type WeChatTabType = 'hall' | 'map' | 'publish' | 'my_trips' | 'profile';
 
 interface WeChatTabBarProps {
   activeTab: WeChatTabType;
   onChangeTab: (tab: WeChatTabType) => void;
   onOpenPublish: () => void;
   bookingCount?: number;
+  myPostCount?: number;
   isVerified?: boolean;
 }
 
@@ -73,11 +73,11 @@ export default function WeChatTabBar({
             <Plus className="h-6 w-6 stroke-[2.8px]" />
           </button>
           <span className="text-[10px] font-bold text-slate-800 mt-0.5">
-            发车求拼
+            发布信息
           </span>
         </div>
 
-        {/* Tab 4: 我的行程 */}
+        {/* Tab 4: 我的发布 */}
         <button
           onClick={() => onChangeTab('my_trips')}
           className={`flex-1 flex flex-col items-center justify-center py-1 transition active:scale-90 ${
@@ -85,15 +85,10 @@ export default function WeChatTabBar({
           }`}
         >
           <div className="relative">
-            <CalendarCheck2 className={`h-5 w-5 ${activeTab === 'my_trips' ? 'stroke-[2.5px]' : 'stroke-[1.8px]'}`} />
-            {bookingCount > 0 && (
-              <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white shadow-2xs">
-                {bookingCount}
-              </span>
-            )}
+            <ClipboardList className={`h-5 w-5 ${activeTab === 'my_trips' ? 'stroke-[2.5px]' : 'stroke-[1.8px]'}`} />
           </div>
           <span className={`text-[10px] mt-0.5 ${activeTab === 'my_trips' ? 'font-bold' : 'font-medium'}`}>
-            我的行程
+            我的发布
           </span>
         </button>
 
@@ -111,7 +106,7 @@ export default function WeChatTabBar({
             )}
           </div>
           <span className={`text-[10px] mt-0.5 ${activeTab === 'profile' ? 'font-bold' : 'font-medium'}`}>
-            业主中心
+            个人中心
           </span>
         </button>
       </div>

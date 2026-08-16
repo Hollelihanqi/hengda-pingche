@@ -7,6 +7,13 @@ import type { CarpoolTrip } from './types/carpool';
 
 onLaunch(() => {
   console.log('【恒大文旅城拼车 uni-app TS】小程序启动');
+  // #ifdef MP-WEIXIN
+  if (typeof wx !== 'undefined' && wx.cloud) {
+    wx.cloud.init({
+      traceUser: true,
+    });
+  }
+  // #endif
   initLocalStorage();
 });
 

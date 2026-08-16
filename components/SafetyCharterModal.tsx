@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, ShieldCheck, HeartHandshake, AlertCircle, CheckCircle2, Award } from 'lucide-react';
+import { X, ShieldCheck, HeartHandshake, CheckCircle2 } from 'lucide-react';
 
 interface SafetyCharterModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export default function SafetyCharterModal({ isOpen, onClose }: SafetyCharterMod
           </div>
           <div>
             <h3 className="text-lg font-bold text-slate-900">恒大文旅城邻里拼车公约</h3>
-            <p className="text-xs text-slate-500">公益非营运 · 互助同行 · 文明守信</p>
+            <p className="text-xs text-slate-500">邻里互助 · 顺路同行 · 文明守信</p>
           </div>
         </div>
 
@@ -38,11 +38,10 @@ export default function SafetyCharterModal({ isOpen, onClose }: SafetyCharterMod
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">
                 1
               </span>
-              零费用公益互助原则
+              邻里顺路合乘原则
             </div>
             <p className="text-slate-600 leading-relaxed pl-6">
-              本小程序专为西安恒大文化旅游城业主日常远郊通勤设立，<strong>不设任何支付、打赏、抽成及算费功能</strong>
-              。严禁利用本平台从事非法客运或变相营运行为。
+              本小程序专为西安恒大文化旅游城及周边业主日常通勤设立，用于邻居之间发布发车与求拼信息。车主与乘客可共同合理分担油耗与高速过路费。
             </p>
           </div>
 
@@ -55,7 +54,7 @@ export default function SafetyCharterModal({ isOpen, onClose }: SafetyCharterMod
               守时与诚信准则
             </div>
             <p className="text-slate-600 leading-relaxed pl-6">
-              文旅城进城早高峰时间宝贵，拼车乘客应提前5分钟在指定门岗等候；车主如遇突发情况请至少提前30分钟在平台告知，杜绝无故爽约。
+              早晚高峰通勤时间宝贵，拼车乘客请提前在指定门岗等候；车主如遇突发路况请提前在平台联系告知，杜绝无故爽约。
             </p>
           </div>
 
@@ -68,7 +67,7 @@ export default function SafetyCharterModal({ isOpen, onClose }: SafetyCharterMod
               安全驾驶与文明乘车
             </div>
             <p className="text-slate-600 leading-relaxed pl-6">
-              车主走绕城高速/正阳大道须系好安全带、不疲劳驾驶、不超速；车内全面禁烟，共同维护干净舒适的乘车环境。
+              行车全程须系好安全带，遵守交通法规；车内全面禁烟，共同维护干净舒适的乘车环境。
             </p>
           </div>
 
@@ -78,10 +77,10 @@ export default function SafetyCharterModal({ isOpen, onClose }: SafetyCharterMod
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600 text-white text-[10px]">
                 4
               </span>
-              免责声明与风险自担
+              信息对接与互助声明
             </div>
             <p className="text-slate-600 leading-relaxed pl-6">
-              平台仅提供同小区邻里出行信息撮合与预约记录，双方基于自愿互助原则同行，各方应自行购买人身意外出行保险。
+              平台提供邻里出行信息撮合，双方基于自愿顺路原则同行，建议各方配置常规人身意外出行保障。
             </p>
           </div>
         </div>

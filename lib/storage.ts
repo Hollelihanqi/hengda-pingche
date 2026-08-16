@@ -90,12 +90,32 @@ export function useCarpoolStore() {
     currentTrips = [newTrip, ...currentTrips];
     saveTripsToStorage(currentTrips);
     emitChange();
+
+    // Async sync with server API in background
+    try {
+      fetch('/api/trips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTrip),
+      }).catch((e) => console.log('Server sync notice:', e));
+    } catch {
+      // ignore
+    }
   }, []);
 
   const cancelTrip = useCallback((tripId: string) => {
     currentTrips = currentTrips.map((t) => (t.id === tripId ? { ...t, status: 'cancelled' as const } : t));
     saveTripsToStorage(currentTrips);
     emitChange();
+
+    // Async sync with server API in background
+    try {
+      fetch(`/api/trips/${tripId}`, {
+        method: 'DELETE',
+      }).catch((e) => console.log('Server sync notice:', e));
+    } catch {
+      // ignore
+    }
   }, []);
 
   const bookSeat = useCallback((tripId: string, bookingData: Omit<PassengerBooking, 'id' | 'createdAt' | 'boardingCode' | 'status'>) => {

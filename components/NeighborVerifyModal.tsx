@@ -55,17 +55,17 @@ export default function NeighborVerifyModal({
 
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-            <ShieldCheck className="h-6 w-6" />
+            <User className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">恒大文旅城业主认证</h3>
-            <p className="text-xs text-slate-500">仅限恒大文旅城业主与常住居民拼车认证</p>
+            <h3 className="text-lg font-bold text-slate-900">个人拼车资料与偏好</h3>
+            <p className="text-xs text-slate-500">方便邻居在上下车时与您快速会合与联系</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">您的姓名 / 称呼</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">您的昵称 / 称呼</label>
             <input
               type="text"
               value={name}
@@ -76,45 +76,41 @@ export default function NeighborVerifyModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">所在期数</label>
-            <select
+            <label className="block text-xs font-semibold text-slate-700 mb-1">文旅城常用门岗 / 区域</label>
+            <input
+              type="text"
               value={phase}
               onChange={(e) => setPhase(e.target.value)}
+              placeholder="自由输入，如：1期星空门岗 / 3期童梦汇 / 4期等"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none"
-            >
-              <option value="恒大文旅城·1期天际星空">恒大文旅城·1期 天际星空</option>
-              <option value="恒大文旅城·2期天际星座">恒大文旅城·2期 天际星座</option>
-              <option value="恒大文旅城·3期童梦汇">恒大文旅城·3期 童梦汇</option>
-              <option value="恒大文旅城·4期公馆">恒大文旅城·4期 公馆</option>
-              <option value="恒大文旅城·风情商业街">恒大文旅城·风情商业街</option>
-            </select>
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">房号 (仅用于实名核验)</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">常用上下车详细点 (选填)</label>
             <input
               type="text"
               value={room}
               onChange={(e) => setRoom(e.target.value)}
-              placeholder="如：3号楼1单元1204"
+              placeholder="如：星空门岗保安亭旁 / 2期东门"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">工作地/职业标签</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">工作地/通勤标签 (选填)</label>
             <input
               type="text"
               value={identityTag}
               onChange={(e) => setIdentityTag(e.target.value)}
-              placeholder="如：高新软件新城·工程师 / 经开行政中心"
+              placeholder="如：高新软件新城 / 运动公园地铁站"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none"
             />
           </div>
 
-          <div className="rounded-xl bg-emerald-50 p-3 text-[11px] text-emerald-900">
-            <span className="font-bold">认证权益：</span>
-            点亮“文旅城认证业主”绿盾标识，提升预约成功率，享受信用优先匹配。
+          <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-[11px] text-slate-600">
+            <span className="font-bold text-emerald-700">💡 提示：</span>
+            本程序为文旅城邻里 0 元公益顺路拼车，无需任何强制认证，随时可发车或预约。
           </div>
 
           <button
@@ -124,10 +120,10 @@ export default function NeighborVerifyModal({
             {isSaved ? (
               <>
                 <CheckCircle2 className="h-4 w-4" />
-                <span>认证资料已更新！</span>
+                <span>资料已更新！</span>
               </>
             ) : (
-              '保存认证信息'
+              '保存资料'
             )}
           </button>
         </form>
