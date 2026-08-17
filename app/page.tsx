@@ -35,6 +35,7 @@ import AiAssistantDrawer from '@/components/AiAssistantDrawer';
 import NeighborVerifyModal from '@/components/NeighborVerifyModal';
 import SafetyCharterModal from '@/components/SafetyCharterModal';
 import MyTripsView from '@/components/MyTripsView';
+import AvatarModal from '@/components/AvatarModal';
 import { useCarpoolStore } from '@/lib/storage';
 import { CarpoolTrip } from '@/types/carpool';
 import { COMMUNITY_COMMUTE_TIPS } from '@/lib/mockData';
@@ -64,6 +65,7 @@ export default function CarpoolHomePage() {
   const [isCharterModalOpen, setIsCharterModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
   // Filtered trips logic
   const filteredTrips = useMemo(() => {
@@ -108,6 +110,30 @@ export default function CarpoolHomePage() {
         {/* TAB 1: 拼车大厅 (FEED VIEW) */}
         {activeTab === 'hall' && (
           <div className="space-y-3 animate-in fade-in duration-200">
+            {/* Top Mini-Program Avatar Quick View & Export Banner */}
+            <div 
+              onClick={() => setIsAvatarModalOpen(true)}
+              className="group cursor-pointer rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-3 text-white shadow-md hover:shadow-lg transition-all flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-white/20 p-1 flex items-center justify-center shrink-0 border border-white/30 backdrop-blur-xs">
+                  <img src="/api/avatar" alt="Avatar" className="w-9 h-9 rounded-lg" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5 text-xs font-black tracking-tight text-white">
+                    <span>小程序头像已就绪</span>
+                    <span className="px-1.5 py-0.2 rounded-md bg-amber-400 text-amber-950 font-extrabold text-[9px]">
+                      144×144 PNG
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-emerald-100/90 line-clamp-1 mt-0.5">
+                    点击直接实时预览并一键下载无损 PNG
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-emerald-200 group-hover:translate-x-0.5 transition" />
+            </div>
+
             {/* Search & Filter Bar */}
             <div className="rounded-2xl bg-white p-3 border border-slate-200/80 shadow-xs space-y-2.5">
               {/* Search input */}
@@ -317,41 +343,62 @@ export default function CarpoolHomePage() {
         {isAboutModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
             <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-200">
-              <div className="h-14 w-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md font-black text-xl">
-                恒
+              {/* App Avatar 144x144 Preview */}
+              <div className="mx-auto w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-emerald-500/20 bg-emerald-600 flex items-center justify-center relative">
+                <img
+                  src="/app-avatar-144.png"
+                  alt="小程序头像"
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <div>
-                <h3 className="text-base font-black text-slate-900">恒大文旅城邻里拼车</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  西安恒大文化旅游城业主专属通勤互助信息平台
+                <h3 className="text-base font-black text-slate-900">邻里同路顺风拼车</h3>
+                <p className="text-xs text-emerald-600 font-medium mt-0.5">
+                  已生成标准微信小程序头像 (144×144 PNG, 2.1KB)
                 </p>
               </div>
 
               <div className="rounded-2xl bg-slate-50 p-3.5 text-left text-xs text-slate-600 space-y-1.5 border border-slate-100">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">服务区域</span>
-                  <span className="font-bold text-slate-800">西安恒大文化旅游城 (1~5期)</span>
+                  <span className="text-slate-400">图片格式</span>
+                  <span className="font-bold text-slate-800">PNG (无损透明圆角)</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">定位</span>
-                  <span className="font-bold text-emerald-700">纯公益 · 邻里信息板</span>
+                  <span className="text-slate-400">建议尺寸</span>
+                  <span className="font-bold text-emerald-700">144px × 144px (最佳)</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">联系方式</span>
-                  <span className="font-bold text-slate-800">一键直接电话呼叫</span>
+                  <span className="text-slate-400">文件体积</span>
+                  <span className="font-bold text-slate-800">2.1 KB (&lt; 2M，秒速上传)</span>
                 </div>
               </div>
 
-              <button
-                onClick={() => setIsAboutModalOpen(false)}
-                className="w-full rounded-2xl bg-slate-900 py-3 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition"
-              >
-                我知道了
-              </button>
+              <div className="flex gap-2">
+                <a
+                  href="/app-avatar-144.png"
+                  download="app-avatar-144.png"
+                  className="flex-1 rounded-2xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition flex items-center justify-center gap-1.5"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  下载头像图片
+                </a>
+                <button
+                  onClick={() => setIsAboutModalOpen(false)}
+                  className="rounded-2xl bg-slate-100 px-5 py-3 text-xs font-bold text-slate-700 hover:bg-slate-200 transition"
+                >
+                  关闭
+                </button>
+              </div>
             </div>
           </div>
         )}
+
+        {/* Dedicated Live Avatar Canvas Modal */}
+        <AvatarModal
+          isOpen={isAvatarModalOpen}
+          onClose={() => setIsAvatarModalOpen(false)}
+        />
       </div>
     </WeChatAppContainer>
   );
